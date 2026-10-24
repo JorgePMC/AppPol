@@ -1,5 +1,6 @@
 package com.example.apppol.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -10,8 +11,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-
+import com.example.apppol.data.UserDbHelper
 import com.example.apppol.ui.components.FormularioRegistro
 import com.example.apppol.ui.model.InfoFormularioRegistro
 
@@ -27,6 +29,8 @@ fun PantallaRe(
     var regimiento by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
 
+    val context = LocalContext.current
+    val dbHelper = remember { UserDbHelper(context) }
     val scrollState = rememberScrollState()
 
     Surface (
@@ -75,15 +79,32 @@ fun PantallaRe(
                         contraseña.isNotBlank() &&
                         regimiento.isNotBlank() &&
                         direccion.isNotBlank()) {
-                        val datosRegistro = InfoFormularioRegistro(
+
+                        val exito = dbHelper.registrarUsuario(
                             rut = rut,
-                            nombreCompleto = nombreCompleto,
+                            nombre = nombreCompleto,
                             correo = correo,
-                            contraseña = contraseña,
-                            regimineto = regimiento,
+                            pass = contraseña,
+                            regimiento = regimiento,
                             direccion = direccion
                         )
-                        onNavReEx(datosRegistro)
+
+                        if (exito) {
+                            Toast.makeText(context, "Usuario registrado exitosamente", Toast.LENGTH_SHORT).show()
+                            val datosRegistro = InfoFormularioRegistro(
+                                rut = rut,
+                                nombreCompleto = nombreCompleto,
+                                correo = correo,
+                                contraseña = contraseña,
+                                regimineto = regimiento,
+                                direccion = direccion
+                            )
+                            onNavReEx(datosRegistro)
+                        } else {
+                            Toast.makeText(context, "Error al registrar (RUT ya existe)", Toast.LENGTH_SHORT).show()
+                        }
+                    } else {
+                        Toast.makeText(context, "Por favor complete todos los campos", Toast.LENGTH_SHORT).show()
                     }
                 },
                 modifier = Modifier.fillMaxWidth()

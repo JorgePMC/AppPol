@@ -1,5 +1,6 @@
 package com.example.apppol.ui.screens
 
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -12,10 +13,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.example.apppol.R
-
+import com.example.apppol.data.UserDbHelper
 import com.example.apppol.ui.components.formularioInicioSesion
 import com.example.apppol.ui.model.InfoInicioSesion
 
@@ -27,6 +29,9 @@ fun PantallaInSe(
     var nombreCompleto by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var contraseña by remember { mutableStateOf("") }
+
+    val context = LocalContext.current
+    val dbHelper = remember { UserDbHelper(context) }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -76,15 +81,21 @@ fun PantallaInSe(
             ) {
                 Button(
                     onClick = {
-                        if (nombreCompleto.isNotBlank() &&
-                            correo.isNotBlank() &&
-                            contraseña.isNotBlank()){
-                            val datosInicioSesion = InfoInicioSesion(
-                                nombreCompleto = nombreCompleto,
-                                correo = correo,
-                                contraseña = contraseña
-                            )
-                            onNavegarIndex(datosInicioSesion)
+                        if (correo.isNotBlank() && contraseña.isNotBlank()) {
+                            val esValido = dbHelper.validarLogin(correo = correo, pass = contraseña)
+
+                            if (esValido) {
+                                val datosInicioSesion = InfoInicioSesion(
+                                    nombreCompleto = nombreCompleto,
+                                    correo = correo,
+                                    contraseña = contraseña
+                                )
+                                onNavegarIndex(datosInicioSesion)
+                            } else {
+                                Toast.makeText(context, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
+                            }
+                        } else {
+                            Toast.makeText(context, "Ingrese su correo y contraseña", Toast.LENGTH_SHORT).show()
                         }
                     },
                     modifier = Modifier.fillMaxWidth()
