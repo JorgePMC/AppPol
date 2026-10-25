@@ -1,11 +1,11 @@
 package com.example.apppol.ui.screens
 
-
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -13,14 +13,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
+import com.example.apppol.ui.viewmodels.MainViewModel
+import com.example.apppol.ui.components.BarraNavegacionInferior
+
 @Composable
-fun PantallaIn(
-    onAlgo: () -> Unit
-){
-    Surface(
-        modifier = Modifier.fillMaxSize(),
+fun PantallaIn(viewModel: MainViewModel) {
+
+    Scaffold(
+        bottomBar = {
+            BarraNavegacionInferior(viewModel = viewModel)
+        }
+    ) { innerPadding ->
+        Surface(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(innerPadding),
         color = MaterialTheme.colorScheme.surfaceVariant
-    ){
+        ){
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -33,5 +42,6 @@ fun PantallaIn(
                 style = MaterialTheme.typography.headlineMedium
             )
         }
+    }
     }
 }

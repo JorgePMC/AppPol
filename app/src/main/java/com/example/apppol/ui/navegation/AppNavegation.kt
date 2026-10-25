@@ -5,18 +5,41 @@ import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.apppol.ui.screens.PantallaIn
 
+import com.example.apppol.ui.screens.PantallaIn
 import com.example.apppol.ui.screens.PantallaRe
 import com.example.apppol.ui.screens.PantallaInSe
+import com.example.apppol.ui.screens.PantallaMa
+import com.example.apppol.ui.screens.PantallaMaCo
+import com.example.apppol.ui.screens.PantallaPe
 import com.example.apppol.ui.screens.PantallaReEx
 
+import com.example.apppol.ui.viewmodels.MainViewModel
+import com.example.apppol.ui.viewmodels.NavigationEvent
+
+import kotlinx.coroutines.flow.collectLatest
+
 @Composable
-fun AppNavigation(){
+fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compose.viewModel()) {
     val navController = rememberNavController()
+
+    LaunchedEffect(key1 = Unit) {
+        viewModel.navigationEvents.collectLatest { event ->
+            when (event) {
+                is NavigationEvent.NavigateTo -> {
+                    navController.navigate(route = event.route.route) {
+                        launchSingleTop = event.singleTop
+                    }
+                }
+                /*is NavigationEvent.PopBackStack -> navController.popBackStack()*/
+            }
+        }
+    }
+
     NavHost(navController = navController , startDestination = "pantallaInSe"){
         composable (
             route = "pantallaInSe",
@@ -26,8 +49,8 @@ fun AppNavigation(){
             popExitTransition = {fadeOut(animationSpec = tween(1500)) },
         ){
             PantallaInSe (
-                onNavegarIndex = {navController.navigate("PantallaIn")},
-                onNavegarRegistro = {navController.navigate("pantallaRe")}
+                onNavegarIndex = {navController.navigate(ScreenIn.Inicio.route)},
+                onNavegarRegistro = { navController.navigate("pantallaRe") }
             )
         }
 
@@ -58,16 +81,24 @@ fun AppNavigation(){
             route = "PantallaReEx"
         ){
             PantallaReEx(
-                onNavIndex = {navController.navigate("PantallaIn")}
+                onNavIndex = {navController.navigate(ScreenIn.Inicio.route)}
             )
         }
 
-        composable(
-            route = "PantallaIn"
-        ){
-            PantallaIn(
-                onAlgo = {navController.navigate("#3")}
-            )
+        composable(route = ScreenIn.Inicio.route) {
+            PantallaIn(viewModel = viewModel)
+        }
+
+        composable(route = ScreenIn.Materias.route) {
+            PantallaMa(viewModel = viewModel)
+        }
+
+        composable(route = ScreenIn.Material.route) {
+            PantallaMaCo(viewModel = viewModel)
+        }
+
+        composable(route = ScreenIn.Perfil.route) {
+            PantallaPe(viewModel = viewModel)
         }
     }
 }
