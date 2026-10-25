@@ -17,6 +17,7 @@ import com.example.apppol.ui.screens.PantallaMa
 import com.example.apppol.ui.screens.PantallaMaCo
 import com.example.apppol.ui.screens.PantallaPe
 import com.example.apppol.ui.screens.PantallaReEx
+import com.example.apppol.ui.screens.PantallaConsultas
 
 import com.example.apppol.ui.viewmodels.MainViewModel
 import com.example.apppol.ui.viewmodels.NavigationEvent
@@ -86,7 +87,11 @@ fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compos
         }
 
         composable(route = ScreenIn.Inicio.route) {
-            PantallaIn(viewModel = viewModel)
+            PantallaIn(
+                viewModel = viewModel,
+                onNavegarConsultas = { navController.navigate("pantallaConsultas") },
+                onNavegarAsignaturas = { navController.navigate(ScreenIn.Materias.route) }
+            )
         }
 
         composable(route = ScreenIn.Materias.route) {
@@ -99,6 +104,10 @@ fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compos
 
         composable(route = ScreenIn.Perfil.route) {
             PantallaPe(viewModel = viewModel)
+        }
+
+        composable(route = "pantallaConsultas") {
+            PantallaConsultas(viewModel = viewModel)
         }
     }
 }

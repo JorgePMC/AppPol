@@ -48,7 +48,7 @@ fun FormularioRegistro(
         OutlinedTextField(
             value = nombre,
             onValueChange = onNombreChange,
-            label = { Text("Ingrese su primer y segundo nombre") },
+            label = { Text("Ingrese su primer y apellido") },
             modifier = Modifier.fillMaxWidth()
         )
 
