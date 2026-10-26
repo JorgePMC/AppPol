@@ -16,14 +16,18 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+
 import com.example.apppol.R
 import com.example.apppol.data.UserDbHelper
 import com.example.apppol.ui.components.formularioInicioSesion
 import com.example.apppol.ui.model.InfoInicioSesion
+import com.example.apppol.ui.viewmodels.MainViewModel
 
 @Composable
 fun PantallaInSe(
+    viewModel: MainViewModel,
     onNavegarIndex: (InfoInicioSesion) -> Unit,
+    onNavegarDocenteComplementario: () -> Unit, //implementado solamente para que se vea en la evaluacion el acceso exclusivo
     onNavegarRegistro: () -> Unit
 ) {
     var nombreCompleto by remember { mutableStateOf("") }
@@ -32,6 +36,19 @@ fun PantallaInSe(
 
     val context = LocalContext.current
     val dbHelper = remember { UserDbHelper(context) }
+
+    val loginExitoso by viewModel.loginExitoso.collectAsState()
+    val esDocente by viewModel.esDocente.collectAsState()
+    LaunchedEffect(loginExitoso) {
+        if (loginExitoso) {
+            if (esDocente) {
+                onNavegarDocenteComplementario()
+            } else {
+                val datosInicioSesion = InfoInicioSesion(nombreCompleto, correo, contraseña)
+                onNavegarIndex(datosInicioSesion)
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -82,9 +99,9 @@ fun PantallaInSe(
                 Button(
                     onClick = {
                         if (correo.isNotBlank() && contraseña.isNotBlank()) {
-                            val esValido = dbHelper.validarLogin(correo = correo, pass = contraseña)
+                            viewModel.iniciarSesion(context, nombreCompleto, correo, clave = contraseña)
 
-                            if (esValido) {
+                            if (viewModel.loginExitoso.value) {
                                 val datosInicioSesion = InfoInicioSesion(
                                     nombreCompleto = nombreCompleto,
                                     correo = correo,

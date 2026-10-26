@@ -5,6 +5,4 @@ data class InfoFormularioRegistro(val rut: String,
                                   val correo: String,
                                   val contraseña: String,
                                   val regimineto: String,
-                                  val direccion: String){
-
-}
+                                  val direccion: String){}

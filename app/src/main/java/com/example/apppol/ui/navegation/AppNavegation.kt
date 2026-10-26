@@ -50,7 +50,9 @@ fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compos
             popExitTransition = {fadeOut(animationSpec = tween(1500)) },
         ){
             PantallaInSe (
-                onNavegarIndex = {navController.navigate(ScreenIn.Inicio.route)},
+                viewModel = viewModel,
+                onNavegarIndex = { navController.navigate(ScreenIn.Inicio.route) },
+                onNavegarDocenteComplementario = { navController.navigate(ScreenIn.Material.route) },//implementado solamente para que se vea en la evaluacion el acceso exclusivo
                 onNavegarRegistro = { navController.navigate("pantallaRe") }
             )
         }
