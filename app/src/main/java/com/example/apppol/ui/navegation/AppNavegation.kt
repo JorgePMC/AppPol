@@ -11,6 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 
 import com.example.apppol.ui.screens.PantallaIn
+import com.example.apppol.ui.screens.PantallaProgreso
 import com.example.apppol.ui.screens.PantallaRe
 import com.example.apppol.ui.screens.PantallaInSe
 import com.example.apppol.ui.screens.PantallaMa
@@ -18,6 +19,7 @@ import com.example.apppol.ui.screens.PantallaMaCo
 import com.example.apppol.ui.screens.PantallaPe
 import com.example.apppol.ui.screens.PantallaReEx
 import com.example.apppol.ui.screens.PantallaConsultas
+import com.example.apppol.ui.screens.PantallaDocente
 
 import com.example.apppol.ui.viewmodels.MainViewModel
 import com.example.apppol.ui.viewmodels.NavigationEvent
@@ -33,63 +35,68 @@ fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compos
             when (event) {
                 is NavigationEvent.NavigateTo -> {
                     navController.navigate(route = event.route.route) {
-                        launchSingleTop = event.singleTop
+                        launchSingleTop = true
                     }
                 }
-                /*is NavigationEvent.PopBackStack -> navController.popBackStack()*/
+                else -> {}
             }
         }
     }
 
-    NavHost(navController = navController , startDestination = "pantallaInSe"){
-        composable (
+    NavHost(navController = navController, startDestination = "pantallaInSe") {
+        composable(
             route = "pantallaInSe",
-            enterTransition = { fadeIn(animationSpec = tween(1500))},
-            exitTransition = {fadeOut(animationSpec = tween(2500)) },
-            popEnterTransition ={ fadeIn(animationSpec = tween(1500))},
-            popExitTransition = {fadeOut(animationSpec = tween(1500)) },
-        ){
-            PantallaInSe (
+            enterTransition = { fadeIn(animationSpec = tween(1500)) },
+            exitTransition = { fadeOut(animationSpec = tween(2500)) }
+        ) {
+            PantallaInSe(
                 viewModel = viewModel,
                 onNavegarIndex = { navController.navigate(ScreenIn.Inicio.route) },
-                onNavegarDocenteComplementario = { navController.navigate(ScreenIn.Material.route) },//implementado solamente para que se vea en la evaluacion el acceso exclusivo
+                onNavegarDocenteComplementario = {
+                    // Redirige directamente al nuevo Panel Docente y quita el Login del stack
+                    navController.navigate("pantallaDocente") {
+                        popUpTo("pantallaInSe") { inclusive = true }
+                    }
+                },
                 onNavegarRegistro = { navController.navigate("pantallaRe") }
             )
         }
 
-        composable(
-            route = "pantallaRe",
-            enterTransition = {
-                slideIntoContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Up,
-                    animationSpec = tween(1000)
-                )
-            },
-            exitTransition = {
-                slideOutOfContainer(
-                    towards = AnimatedContentTransitionScope.SlideDirection.Down,
-                    animationSpec = tween(500)
-                )
-            }
-
-        ){
-            PantallaRe(
-                onNavReEx = {navController.navigate("PantallaReEx")},
-                onVolver = {navController.popBackStack()}
-
+        // PANEL EXCLUSIVO DOCENTE
+        composable(route = "pantallaDocente") {
+            PantallaDocente(
+                viewModel = viewModel,
+                onNavegarConsultas = { navController.navigate("pantallaConsultas") },
+                onNavegarMaterial = { navController.navigate(ScreenIn.Material.route) },
+                onNavegarAsignaturas = { navController.navigate(ScreenIn.Materias.route) },
+                onNavegarPerfil = { navController.navigate(ScreenIn.Perfil.route) }
             )
         }
 
-        composable (
-            route = "PantallaReEx"
-        ){
+        composable(route = "pantallaRe") {
+            PantallaRe(
+                onNavReEx = { navController.navigate("PantallaReEx") },
+                onVolver = { navController.popBackStack() }
+            )
+        }
+
+        composable(route = "PantallaReEx") {
             PantallaReEx(
-                onNavIndex = {navController.navigate(ScreenIn.Inicio.route)}
+                onNavIndex = { navController.navigate(ScreenIn.Inicio.route) }
             )
         }
 
         composable(route = ScreenIn.Inicio.route) {
             PantallaIn(
+                viewModel = viewModel,
+                onNavegarProgreso = { navController.navigate("pantallaProgreso") },
+                onNavegarAsignaturas = { navController.navigate(ScreenIn.Materias.route) },
+                onNavegarConsultas = { navController.navigate("pantallaConsultas") }
+            )
+        }
+
+        composable(route = "pantallaProgreso") {
+            PantallaProgreso(
                 viewModel = viewModel,
                 onNavegarConsultas = { navController.navigate("pantallaConsultas") },
                 onNavegarAsignaturas = { navController.navigate(ScreenIn.Materias.route) }
@@ -105,7 +112,14 @@ fun AppNavigation(viewModel: MainViewModel = androidx.lifecycle.viewmodel.compos
         }
 
         composable(route = ScreenIn.Perfil.route) {
-            PantallaPe(viewModel = viewModel)
+            PantallaPe(
+                viewModel = viewModel,
+                onCerrarSesion = {
+                    navController.navigate("pantallaInSe") {
+                        popUpTo(0) { inclusive = true }
+                    }
+                }
+            )
         }
 
         composable(route = "pantallaConsultas") {

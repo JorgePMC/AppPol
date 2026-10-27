@@ -16,9 +16,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-
 import com.example.apppol.R
-import com.example.apppol.data.UserDbHelper
 import com.example.apppol.ui.components.formularioInicioSesion
 import com.example.apppol.ui.model.InfoInicioSesion
 import com.example.apppol.ui.viewmodels.MainViewModel
@@ -27,7 +25,7 @@ import com.example.apppol.ui.viewmodels.MainViewModel
 fun PantallaInSe(
     viewModel: MainViewModel,
     onNavegarIndex: (InfoInicioSesion) -> Unit,
-    onNavegarDocenteComplementario: () -> Unit, //implementado solamente para que se vea en la evaluacion el acceso exclusivo
+    onNavegarDocenteComplementario: () -> Unit,
     onNavegarRegistro: () -> Unit
 ) {
     var nombreCompleto by remember { mutableStateOf("") }
@@ -35,16 +33,25 @@ fun PantallaInSe(
     var contraseña by remember { mutableStateOf("") }
 
     val context = LocalContext.current
-    val dbHelper = remember { UserDbHelper(context) }
-
     val loginExitoso by viewModel.loginExitoso.collectAsState()
     val esDocente by viewModel.esDocente.collectAsState()
+
+    // Reiniciamos el estado de sesión cada vez que la pantalla de inicio de sesión entra en foco
+    LaunchedEffect(Unit) {
+        viewModel.cerrarSesion()
+    }
+
+    // Reacciona al cambio de estado de login exitoso
     LaunchedEffect(loginExitoso) {
         if (loginExitoso) {
             if (esDocente) {
                 onNavegarDocenteComplementario()
             } else {
-                val datosInicioSesion = InfoInicioSesion(nombreCompleto, correo, contraseña)
+                val datosInicioSesion = InfoInicioSesion(
+                    nombreCompleto = nombreCompleto,
+                    correo = correo,
+                    contraseña = contraseña
+                )
                 onNavegarIndex(datosInicioSesion)
             }
         }
@@ -92,6 +99,7 @@ fun PantallaInSe(
                     onContraseñaChange = { contraseña = it }
                 )
             }
+
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -99,16 +107,9 @@ fun PantallaInSe(
                 Button(
                     onClick = {
                         if (correo.isNotBlank() && contraseña.isNotBlank()) {
-                            viewModel.iniciarSesion(context, nombreCompleto, correo, clave = contraseña)
+                            viewModel.iniciarSesion(context, nombreCompleto, correo, contraseña)
 
-                            if (viewModel.loginExitoso.value) {
-                                val datosInicioSesion = InfoInicioSesion(
-                                    nombreCompleto = nombreCompleto,
-                                    correo = correo,
-                                    contraseña = contraseña
-                                )
-                                onNavegarIndex(datosInicioSesion)
-                            } else {
+                            if (!viewModel.loginExitoso.value) {
                                 Toast.makeText(context, "Correo o contraseña incorrectos", Toast.LENGTH_SHORT).show()
                             }
                         } else {

@@ -5,11 +5,18 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -21,6 +28,9 @@ fun formularioInicioSesion (
     contraseña: String,
     onContraseñaChange: (String) -> Unit
 ){
+    // Estado interno para controlar si la contraseña es visible o está oculta
+    var contrasenaVisible by remember { mutableStateOf(false) }
+
     Column(modifier = Modifier.fillMaxSize()) {
         Text(
             text = "Nombre completo: ",
@@ -56,6 +66,17 @@ fun formularioInicioSesion (
             value = contraseña,
             onValueChange = onContraseñaChange,
             label = {Text("Ingrese su contraseña")},
+            // Si contrasenaVisible es true muestra el texto, de lo contrario muestra asterisco/puntos
+            visualTransformation = if (contrasenaVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            trailingIcon = {
+                val imagenIcono = if (contrasenaVisible) Icons.Filled.Visibility else Icons.Filled.VisibilityOff
+                IconButton(onClick = { contrasenaVisible = !contrasenaVisible }) {
+                    Icon(
+                        imageVector = imagenIcono,
+                        contentDescription = if (contrasenaVisible) "Ocultar contraseña" else "Mostrar contraseña"
+                    )
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         )
     }
